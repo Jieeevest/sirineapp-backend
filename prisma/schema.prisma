@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Products {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float
+  stock       Int
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
+  cartItems   CartItems[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Carts {
+  id          Int             @id @default(autoincrement())
+  userId      Int
+  user        Users           @relation(fields: [userId], references: [id])
+  cartItems   CartItems[]
+  status      String          @default("active") // Example statuses: active, checked_out
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model CartItems {
+  id          Int             @id @default(autoincrement())
+  cartId      Int
+  cart        Carts           @relation(fields: [cartId], references: [id])
+  productId   Int
+  product     Products        @relation(fields: [productId], references: [id])
+  quantity    Int             @default(1)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String
+  products    Products[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Orders {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        Users    @relation(fields: [userId], references: [id])
+  totalAmount Float
+  status      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Users {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  password    String
+  roles       Roles    @relation(fields: [roleId], references: [id])
+  roleId      Int
+  carts       Carts[]
+  orders      Orders[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Roles {
+  id          Int      @id @default(autoincrement())
+  name        String
+  users       Users[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ActivityLog {
+  id          Int      @id @default(autoincrement())
+  activity    String
+  timestamp   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ErrorLog {
+  id          Int      @id @default(autoincrement())
+  error       String
+  stackTrace  String?
+  timestamp   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
