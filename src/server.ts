@@ -23,11 +23,14 @@ server.register(usersRoutes, { prefix: prefix + "/users" });
 
 const start = async () => {
   try {
-    await server.listen({ port: 3000 });
-    console.log("Server listening on port 3000");
+    // Set host to 0.0.0.0 and port to process.env.PORT or 3000
+    await server.listen({
+      host: "0.0.0.0",
+      port: Number(process.env.PORT) || 3000,
+    });
+    console.log(`Server listening on port ${process.env.PORT || 3000}`);
   } catch (err) {
     server.log.error(err);
-    process.exit(1);
   }
 };
 
