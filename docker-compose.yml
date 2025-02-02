@@ -1,16 +1,16 @@
 version: "2"
 services:
-  sirine-api:
-    image: localhost/sirine-backend:1.0.0
+  backoffice-api:
+    image: localhost/backoffice-core:1.0.0
     build: .
-    container_name: sirine-backend
+    container_name: backoffice-core
     restart: unless-stopped
     volumes:
-      - .env:/app/.env
-      - ./src/:/app/src/
-      - ./prisma/schema.prisma:/app/prisma/schema.prisma
+      - ./.env:/app/env:ro      
+      - ./src:/app/src           
+      - ./prisma/schema.prisma:/app/prisma/schema.prisma 
     ports:
-      - "3002:3002"
+      - "5001:5001"
 networks:
-  postgres14:
+  db:
     external: true
