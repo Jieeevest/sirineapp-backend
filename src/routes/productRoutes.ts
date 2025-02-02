@@ -6,13 +6,14 @@ import {
   updateProduct,
   deleteProduct,
 } from "../controllers/ProductController";
+import { checkSession } from "../middlewares/checkSession";
 
 async function productRoutes(server: FastifyInstance) {
-  server.get("/", getProducts);
-  server.get("/:id", getProductById);
-  server.post("/", createProduct);
-  server.put("/:id", updateProduct);
-  server.delete("/:id", deleteProduct);
+  server.get("/", { preHandler: [checkSession] }, getProducts);
+  server.get("/:id", { preHandler: [checkSession] }, getProductById);
+  server.post("/", { preHandler: [checkSession] }, createProduct);
+  server.put("/:id", { preHandler: [checkSession] }, updateProduct);
+  server.delete("/:id", { preHandler: [checkSession] }, deleteProduct);
 }
 
 export default productRoutes;

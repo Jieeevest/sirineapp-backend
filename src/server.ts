@@ -8,9 +8,9 @@ import rolesRoutes from "./routes/rolesRoutes";
 import usersRoutes from "./routes/usersRoutes";
 import cartsRoutes from "./routes/cartsRoutes";
 import cartItemsRoutes from "./routes/cartItemsRoutes";
+import authRoutes from "./routes/authRoutes";
 
 const server = Fastify();
-// {logger: true}
 
 const prefix = "/api";
 
@@ -21,6 +21,7 @@ server.register(cors, {
   allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
 });
 
+server.register(authRoutes, { prefix: prefix + "/auth" });
 server.register(productRoutes, { prefix: prefix + "/products" });
 server.register(categoriesRoutes, { prefix: prefix + "/categories" });
 server.register(ordersRoutes, { prefix: prefix + "/orders" });

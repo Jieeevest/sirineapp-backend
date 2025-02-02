@@ -24,6 +24,30 @@ export const getRoles = async (
   }
 };
 
+export const getRoleById = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const { id } = request.params as { id: string };
+
+  try {
+    const validatedRole = await _validateRoleId(id, reply);
+    if (!validatedRole) return;
+
+    sendResponse(reply, 200, {
+      success: true,
+      message: "Role fetched successfully",
+      data: validatedRole.role,
+    });
+  } catch (error) {
+    sendResponse(reply, 500, {
+      success: false,
+      message: "Error fetching role",
+      error: error,
+    });
+  }
+};
+
 export const createRole = async (
   request: FastifyRequest,
   reply: FastifyReply

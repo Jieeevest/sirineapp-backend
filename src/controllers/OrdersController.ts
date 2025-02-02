@@ -26,6 +26,30 @@ export const getOrders = async (
   }
 };
 
+export const getOrderById = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const { id } = request.params as { id: string };
+
+  try {
+    const validatedOrder = await _validateOrderId(id, reply);
+    if (!validatedOrder) return;
+
+    sendResponse(reply, 200, {
+      success: true,
+      message: "Order fetched successfully",
+      data: validatedOrder.order,
+    });
+  } catch (error) {
+    sendResponse(reply, 500, {
+      success: false,
+      message: "Error fetching order",
+      error: error,
+    });
+  }
+};
+
 export const createOrder = async (
   request: FastifyRequest,
   reply: FastifyReply

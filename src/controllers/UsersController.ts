@@ -26,6 +26,30 @@ export const getUsers = async (
   }
 };
 
+export const getUserById = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const { id } = request.params as { id: string };
+
+  try {
+    const validatedUser = await _validateUserId(id, reply);
+    if (!validatedUser) return;
+
+    sendResponse(reply, 200, {
+      success: true,
+      message: "User fetched successfully",
+      data: validatedUser.user,
+    });
+  } catch (error) {
+    sendResponse(reply, 500, {
+      success: false,
+      message: "Error fetching user",
+      error: error,
+    });
+  }
+};
+
 export const createUser = async (
   request: FastifyRequest,
   reply: FastifyReply
