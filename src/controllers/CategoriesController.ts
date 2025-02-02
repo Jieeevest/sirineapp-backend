@@ -26,6 +26,30 @@ export const getCategories = async (
   }
 };
 
+export const getCategoryById = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const { id } = request.params as { id: string };
+
+  try {
+    const validatedCategory = await _validateCategoryId(id, reply);
+    if (!validatedCategory) return;
+
+    sendResponse(reply, 200, {
+      success: true,
+      message: "Category fetched successfully",
+      data: validatedCategory.category,
+    });
+  } catch (error) {
+    sendResponse(reply, 500, {
+      success: false,
+      message: "Error fetching category",
+      error: error,
+    });
+  }
+};
+
 export const createCategory = async (
   request: FastifyRequest,
   reply: FastifyReply
