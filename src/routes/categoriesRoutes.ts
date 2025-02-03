@@ -6,7 +6,7 @@ import {
   deleteCategory,
   getCategoryById,
 } from "../controllers/CategoriesController";
-import { checkSession } from "../middlewares/checkSession";
+import { checkSession } from "../middlewares";
 
 async function categoriesRoutes(server: FastifyInstance) {
   server.get("/", { preHandler: [checkSession] }, getCategories);

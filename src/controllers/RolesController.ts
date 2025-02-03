@@ -10,13 +10,13 @@ export const getRoles = async (
 ) => {
   try {
     const roles = await prisma.roles.findMany();
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Roles fetched successfully",
       data: roles,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error fetching roles",
       error: error,
@@ -34,13 +34,13 @@ export const getRoleById = async (
     const validatedRole = await _validateRoleId(id, reply);
     if (!validatedRole) return;
 
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Role fetched successfully",
       data: validatedRole.role,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error fetching role",
       error: error,
@@ -57,13 +57,13 @@ export const createRole = async (
     const newRole = await prisma.roles.create({
       data: { name },
     });
-    sendResponse(reply, 201, {
+    return sendResponse(reply, 201, {
       success: true,
       message: "Role created successfully",
       data: newRole,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error creating role",
       error: error,
@@ -85,13 +85,13 @@ export const updateRole = async (
       where: { id: validatedRole.roleId },
       data: { name },
     });
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Role updated successfully",
       data: updatedRole,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error updating role",
       error: error,
@@ -112,13 +112,13 @@ export const deleteRole = async (
       where: { id: validatedRole.roleId },
     });
 
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Role deleted successfully",
       data: deletedRole,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error deleting role",
       error: error,

@@ -13,13 +13,13 @@ export const getProducts = async (
     const products = await prisma.products.findMany({
       include: { category: true },
     });
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Products fetched successfully",
       data: products,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error fetching products",
       error: error,
@@ -36,14 +36,14 @@ export const getProductById = async (
     const validatedProduct = await _validateProductId(id, reply);
     if (!validatedProduct) return;
 
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Product fetched successfully",
       data: validatedProduct.product,
     });
   } catch (error) {
     console.error("Error fetching product:", error);
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error fetching product",
       error: error,
@@ -72,13 +72,13 @@ export const createProduct = async (
         categoryId,
       },
     });
-    sendResponse(reply, 201, {
+    return sendResponse(reply, 201, {
       success: true,
       message: "Product created successfully",
       data: newProduct,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error creating product",
       error: error,
@@ -112,13 +112,13 @@ export const updateProduct = async (
         categoryId,
       },
     });
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Product updated successfully",
       data: updatedProduct,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error updating product",
       error: error,
@@ -139,13 +139,13 @@ export const deleteProduct = async (
       where: { id: validatedProduct.productId },
     });
 
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Product deleted successfully",
       data: deletedProduct,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error deleting product",
       error: error,

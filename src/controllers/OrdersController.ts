@@ -12,13 +12,13 @@ export const getOrders = async (
     const orders = await prisma.orders.findMany({
       include: { user: true }, // Includes user who placed the order
     });
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Orders fetched successfully",
       data: orders,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error fetching orders",
       error: error,
@@ -36,13 +36,13 @@ export const getOrderById = async (
     const validatedOrder = await _validateOrderId(id, reply);
     if (!validatedOrder) return;
 
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Order fetched successfully",
       data: validatedOrder.order,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error fetching order",
       error: error,
@@ -63,13 +63,13 @@ export const createOrder = async (
     const newOrder = await prisma.orders.create({
       data: { userId, totalAmount, status },
     });
-    sendResponse(reply, 201, {
+    return sendResponse(reply, 201, {
       success: true,
       message: "Order created successfully",
       data: newOrder,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error creating order",
       error: error,
@@ -91,13 +91,13 @@ export const updateOrder = async (
       where: { id: validatedOrder.orderId },
       data: { status },
     });
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Order updated successfully",
       data: updatedOrder,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error updating order",
       error: error,
@@ -118,13 +118,13 @@ export const deleteOrder = async (
       where: { id: validatedOrder.orderId },
     });
 
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Order deleted successfully",
       data: deletedOrder,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error deleting order",
       error: error,

@@ -12,13 +12,13 @@ export const getUsers = async (
     const users = await prisma.users.findMany({
       include: { roles: true, carts: true, orders: true }, // Includes role, carts, and orders of users
     });
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Users fetched successfully",
       data: users,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error fetching users",
       error: error,
@@ -36,13 +36,13 @@ export const getUserById = async (
     const validatedUser = await _validateUserId(id, reply);
     if (!validatedUser) return;
 
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "User fetched successfully",
       data: validatedUser.user,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error fetching user",
       error: error,
@@ -64,13 +64,13 @@ export const createUser = async (
     const newUser = await prisma.users.create({
       data: { name, email, password, roleId },
     });
-    sendResponse(reply, 201, {
+    return sendResponse(reply, 201, {
       success: true,
       message: "User created successfully",
       data: newUser,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error creating user",
       error: error,
@@ -97,13 +97,13 @@ export const updateUser = async (
       where: { id: validatedUser.userId },
       data: { name, email, password, roleId },
     });
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "User updated successfully",
       data: updatedUser,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error updating user",
       error: error,
@@ -124,13 +124,13 @@ export const deleteUser = async (
       where: { id: validatedUser.userId },
     });
 
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "User deleted successfully",
       data: deletedUser,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error deleting user",
       error: error,

@@ -6,7 +6,7 @@ import {
   updateProduct,
   deleteProduct,
 } from "../controllers/ProductController";
-import { checkSession } from "../middlewares/checkSession";
+import { checkSession } from "../middlewares";
 
 async function productRoutes(server: FastifyInstance) {
   server.get("/", { preHandler: [checkSession] }, getProducts);

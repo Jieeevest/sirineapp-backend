@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { getCurrentUser, login } from "../controllers/AuthController";
-import { checkSession } from "../middlewares/checkSession";
+import { checkSession } from "../middlewares";
 
 async function authRoutes(server: FastifyInstance) {
   server.post("/", login);

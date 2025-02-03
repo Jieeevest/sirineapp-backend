@@ -23,7 +23,6 @@ export const checkSession = async (
   try {
     const decoded = jwt.verify(token, JWT_SECRET as string);
 
-    // Menambahkan properti user ke request
     (request as any).user = decoded;
 
     return true;

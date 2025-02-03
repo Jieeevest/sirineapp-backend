@@ -6,7 +6,7 @@ import {
   updateOrder,
   deleteOrder,
 } from "../controllers/OrdersController";
-import { checkSession } from "../middlewares/checkSession";
+import { checkSession } from "../middlewares";
 
 async function ordersRoutes(server: FastifyInstance) {
   server.get("/", { preHandler: [checkSession] }, getOrders);

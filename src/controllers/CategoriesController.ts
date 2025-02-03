@@ -12,13 +12,13 @@ export const getCategories = async (
     const categories = await prisma.category.findMany({
       include: { products: true }, // Includes products under each category
     });
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Categories fetched successfully",
       data: categories,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error fetching categories",
       error: error,
@@ -36,13 +36,13 @@ export const getCategoryById = async (
     const validatedCategory = await _validateCategoryId(id, reply);
     if (!validatedCategory) return;
 
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Category fetched successfully",
       data: validatedCategory.category,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error fetching category",
       error: error,
@@ -59,13 +59,13 @@ export const createCategory = async (
     const newCategory = await prisma.category.create({
       data: { name },
     });
-    sendResponse(reply, 201, {
+    return sendResponse(reply, 201, {
       success: true,
       message: "Category created successfully",
       data: newCategory,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error creating category",
       error: error,
@@ -87,13 +87,13 @@ export const updateCategory = async (
       where: { id: validatedCategory.categoryId },
       data: { name },
     });
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Category updated successfully",
       data: updatedCategory,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error updating category",
       error: error,
@@ -114,13 +114,13 @@ export const deleteCategory = async (
       where: { id: validatedCategory.categoryId },
     });
 
-    sendResponse(reply, 200, {
+    return sendResponse(reply, 200, {
       success: true,
       message: "Category deleted successfully",
       data: deletedCategory,
     });
   } catch (error) {
-    sendResponse(reply, 500, {
+    return sendResponse(reply, 500, {
       success: false,
       message: "Error deleting category",
       error: error,

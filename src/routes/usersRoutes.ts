@@ -6,7 +6,7 @@ import {
   updateUser,
   deleteUser,
 } from "../controllers/UsersController";
-import { checkSession } from "../middlewares/checkSession";
+import { checkSession } from "../middlewares";
 
 async function usersRoutes(server: FastifyInstance) {
   server.get("/", { preHandler: [checkSession] }, getUsers);

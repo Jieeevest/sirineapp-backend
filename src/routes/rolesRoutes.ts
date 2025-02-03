@@ -6,7 +6,7 @@ import {
   updateRole,
   deleteRole,
 } from "../controllers/RolesController";
-import { checkSession } from "../middlewares/checkSession";
+import { checkSession } from "../middlewares";
 
 async function rolesRoutes(server: FastifyInstance) {
   server.get("/", { preHandler: [checkSession] }, getRoles);
