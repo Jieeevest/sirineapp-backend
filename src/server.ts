@@ -9,6 +9,7 @@ import {
   cartsRoutes,
   cartItemsRoutes,
   authRoutes,
+  publicRoutes,
 } from "./routes";
 
 const server = Fastify();
@@ -28,6 +29,7 @@ server.register(rolesRoutes, { prefix: prefix + "/roles" });
 server.register(usersRoutes, { prefix: prefix + "/users" });
 server.register(cartsRoutes, { prefix: prefix + "/carts" });
 server.register(cartItemsRoutes, { prefix: prefix + "/cartItems" });
+server.register(publicRoutes, { prefix: prefix + "/public" });
 
 const start = async () => {
   try {

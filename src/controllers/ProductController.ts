@@ -27,6 +27,28 @@ export const getProducts = async (
   }
 };
 
+export const getCatalogs = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  try {
+    const products = await prisma.products.findMany({
+      include: { category: true },
+    });
+    return sendResponse(reply, 200, {
+      success: true,
+      message: "Products fetched successfully",
+      data: products,
+    });
+  } catch (error) {
+    return sendResponse(reply, 500, {
+      success: false,
+      message: "Error fetching products",
+      error: error,
+    });
+  }
+};
+
 export const getProductById = async (
   request: FastifyRequest,
   reply: FastifyReply

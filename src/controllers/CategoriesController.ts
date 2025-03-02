@@ -26,6 +26,28 @@ export const getCategories = async (
   }
 };
 
+export const getPublicCategories = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  try {
+    const categories = await prisma.category.findMany({
+      include: { products: true }, // Includes products under each category
+    });
+    return sendResponse(reply, 200, {
+      success: true,
+      message: "Categories fetched successfully",
+      data: categories,
+    });
+  } catch (error) {
+    return sendResponse(reply, 500, {
+      success: false,
+      message: "Error fetching categories",
+      error: error,
+    });
+  }
+};
+
 export const getCategoryById = async (
   request: FastifyRequest,
   reply: FastifyReply

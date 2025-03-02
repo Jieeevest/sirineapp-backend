@@ -6,6 +6,7 @@ import usersRoutes from "./usersRoutes";
 import cartsRoutes from "./cartsRoutes";
 import cartItemsRoutes from "./cartItemsRoutes";
 import authRoutes from "./authRoutes";
+import publicRoutes from "./publicRoutes";
 
 export {
   productRoutes,
@@ -16,4 +17,5 @@ export {
   cartsRoutes,
   cartItemsRoutes,
   authRoutes,
+  publicRoutes,
 };
