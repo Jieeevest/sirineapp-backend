@@ -33,7 +33,7 @@ export const getCatalogs = async (
 ) => {
   try {
     const products = await prisma.products.findMany({
-      where: { isPublic: true },
+      // where: { isPublic: true },
       include: { category: true },
     });
     return sendResponse(reply, 200, {
