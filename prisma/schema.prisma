@@ -11,8 +11,10 @@ model Products {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
+  image       Bytes?
   price       Float
   stock       Int
+  isPublic    Boolean  @default(false)
   categoryId  Int
   category    Category @relation(fields: [categoryId], references: [id])
   cartItems   CartItems[]

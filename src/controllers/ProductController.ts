@@ -33,6 +33,7 @@ export const getCatalogs = async (
 ) => {
   try {
     const products = await prisma.products.findMany({
+      where: { isPublic: true },
       include: { category: true },
     });
     return sendResponse(reply, 200, {
@@ -77,29 +78,46 @@ export const createProduct = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
-  const { name, description, price, stock, categoryId } = request.body as {
-    name: string;
-    description?: string;
-    price: number;
-    stock: number;
-    categoryId: number;
-  };
   try {
+    const data = await request.file();
+    if (!data) {
+      return sendResponse(reply, 400, {
+        success: false,
+        message: "Image file is required",
+      });
+    }
+
+    const { name, description, price, stock, categoryId, isPublic } =
+      request.body as {
+        name: string;
+        description?: string;
+        price: number;
+        stock: number;
+        categoryId: number;
+        isPublic: string;
+      };
+
+    const buffer = await data.toBuffer(); // Convert file to buffer
+
     const newProduct = await prisma.products.create({
       data: {
         name,
         description,
         price,
         stock,
+        isPublic: isPublic === "true",
         categoryId,
+        image: buffer,
       },
     });
+
     return sendResponse(reply, 201, {
       success: true,
       message: "Product created successfully",
       data: newProduct,
     });
   } catch (error) {
+    console.log(error);
     return sendResponse(reply, 500, {
       success: false,
       message: "Error creating product",
@@ -112,38 +130,52 @@ export const updateProduct = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
-  const { id } = request.params as { id: string };
-  const { name, description, price, stock, categoryId } = request.body as {
-    name?: string;
-    description?: string;
-    price?: number;
-    stock?: number;
-    categoryId?: number;
-  };
   try {
+    const { id } = request.params as { id: string };
+    const data = await request.file();
+
+    const { name, description, price, stock, categoryId, isPublic } =
+      request.body as {
+        name?: string;
+        description?: string;
+        price?: number;
+        stock?: number;
+        categoryId?: number;
+        isPublic?: string;
+      };
+
     const validatedProduct = await _validateProductId(id, reply);
     if (!validatedProduct) return;
 
+    let updateData: any = {
+      name,
+      description,
+      price,
+      stock,
+      categoryId,
+      isPublic: isPublic === "true",
+    };
+
+    if (data) {
+      updateData.image = await data.toBuffer(); // Convert file to buffer
+    }
+
     const updatedProduct = await prisma.products.update({
       where: { id: validatedProduct.productId },
-      data: {
-        name,
-        description,
-        price,
-        stock,
-        categoryId,
-      },
+      data: updateData,
     });
+
     return sendResponse(reply, 200, {
       success: true,
       message: "Product updated successfully",
       data: updatedProduct,
     });
   } catch (error) {
+    console.log(error);
     return sendResponse(reply, 500, {
       success: false,
       message: "Error updating product",
-      error: error,
+      error,
     });
   }
 };
@@ -191,6 +223,7 @@ const _validateProductId = async (
   try {
     const product = await prisma.products.findUnique({
       where: { id: productId },
+      include: { category: true },
     });
 
     if (!product) {

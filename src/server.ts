@@ -1,5 +1,6 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import fastifyMultipart from "@fastify/multipart";
 import {
   productRoutes,
   categoriesRoutes,
@@ -14,6 +15,8 @@ import {
 
 const server = Fastify();
 const prefix = "/api";
+
+server.register(fastifyMultipart);
 
 server.register(cors, {
   origin: "*",

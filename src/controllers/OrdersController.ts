@@ -54,15 +54,59 @@ export const createOrder = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
-  const { userId, totalAmount, status } = request.body as {
-    userId: number;
-    totalAmount: number;
-    status: string;
+  const { userEmail, cart } = request.body as {
+    userEmail: string;
+    cart: { productId: number; quantity: number; price: number }[];
   };
+
   try {
-    const newOrder = await prisma.orders.create({
-      data: { userId, totalAmount, status },
+    const user = await prisma.users.findFirst({ where: { email: userEmail } });
+
+    if (!user) {
+      return sendResponse(reply, 404, {
+        success: false,
+        message: "User not found",
+      });
+    }
+    const cartData = await prisma.carts.create({
+      data: { userId: user.id, status: "active" },
     });
+
+    await prisma.cartItems.createMany({
+      data: cart.map((item) => ({
+        cartId: cartData.id,
+        productId: item.productId,
+        quantity: item.quantity,
+      })),
+      skipDuplicates: true,
+    });
+
+    const cartWithItems = await prisma.carts.findUnique({
+      where: { id: cartData.id },
+      include: { cartItems: { include: { product: true } } },
+    });
+
+    if (!cartWithItems || cartWithItems.cartItems.length === 0) {
+      return sendResponse(reply, 400, {
+        success: false,
+        message: "Cart is empty or not found",
+      });
+    }
+
+    const totalAmount = cartWithItems.cartItems.reduce(
+      (sum, item) => sum + item.quantity * item.product.price,
+      0
+    );
+
+    const newOrder = await prisma.orders.create({
+      data: { userId: user.id, totalAmount, status: "pending" },
+    });
+
+    await prisma.carts.update({
+      where: { id: cartData.id },
+      data: { status: "checked_out" },
+    });
+
     return sendResponse(reply, 201, {
       success: true,
       message: "Order created successfully",
