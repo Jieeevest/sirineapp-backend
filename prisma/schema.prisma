@@ -58,6 +58,8 @@ model Orders {
   userId      Int
   user        Users     @relation(fields: [userId], references: [id])
   totalAmount Float
+  address     String    @default("")
+  evidence    Bytes?
   status      String
   cartId      Int?      @unique
   cart        Carts?    @relation(fields: [cartId], references: [id])

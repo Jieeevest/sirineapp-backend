@@ -129,14 +129,17 @@ export const updateOrder = async (
   reply: FastifyReply
 ) => {
   const { id } = request.params as { id: string };
-  const { status } = request.body as { status: string };
+  const { address, status } = request.body as {
+    address: string;
+    status: string;
+  };
   try {
     const validatedOrder = await _validateOrderId(id, reply);
     if (!validatedOrder) return;
 
     const updatedOrder = await prisma.orders.update({
       where: { id: validatedOrder.orderId },
-      data: { status },
+      data: { address, status },
     });
     return sendResponse(reply, 200, {
       success: true,
