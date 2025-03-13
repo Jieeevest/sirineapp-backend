@@ -2,17 +2,60 @@
 import { Orders, PrismaClient } from "@prisma/client";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { sendResponse } from "../helpers";
+import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
+
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 export const getOrders = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
-  try {
-    const orders = await prisma.orders.findMany({
-      include: { user: true, cart: true }, // Includes user who placed the order
+  const authHeader = request.headers.authorization;
+
+  if (!authHeader) {
+    return sendResponse(reply, 401, {
+      success: false,
+      message: "Authorization header is missing",
     });
+  }
+
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
+
+    const user = await prisma.users.findUnique({
+      where: { id: decoded.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        roleId: true,
+        roles: true,
+      },
+    });
+    if (!user) {
+      return sendResponse(reply, 404, {
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    let whereClause: any = null;
+
+    if (user.roleId !== 1) {
+      whereClause = {
+        userId: user.id,
+      };
+    }
+    let options: any = {
+      include: { user: true, cart: true },
+    };
+    if (whereClause) {
+      options.where = whereClause;
+    }
+    const orders = await prisma.orders.findMany(options);
     return sendResponse(reply, 200, {
       success: true,
       message: "Orders fetched successfully",
@@ -103,7 +146,12 @@ export const createOrder = async (
     );
 
     const newOrder = await prisma.orders.create({
-      data: { userId: user.id, totalAmount, status: "pending" },
+      data: {
+        userId: user.id,
+        cartId: cartData.id,
+        totalAmount,
+        status: "pending",
+      },
     });
 
     await prisma.carts.update({
