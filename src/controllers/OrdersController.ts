@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Orders, PrismaClient } from "@prisma/client";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { sendResponse } from "../helpers";
@@ -133,14 +134,27 @@ export const updateOrder = async (
     address: string;
     status: string;
   };
+  const evidence = (request.body as any).evidence as File | undefined; // Evidence mungkin opsional
+
   try {
     const validatedOrder = await _validateOrderId(id, reply);
     if (!validatedOrder) return;
 
+    let evidenceBuffer: Buffer | null = null;
+    if (evidence) {
+      const arrayBuffer = await evidence.arrayBuffer(); // Konversi File ke ArrayBuffer
+      evidenceBuffer = Buffer.from(arrayBuffer); // Ubah ke Buffer
+    }
+
     const updatedOrder = await prisma.orders.update({
-      where: { id: validatedOrder.orderId },
-      data: { address, status },
+      where: { id: Number(validatedOrder.orderId) },
+      data: {
+        address,
+        status,
+        evidence: evidenceBuffer, // Simpan sebagai binary dalam database
+      },
     });
+
     return sendResponse(reply, 200, {
       success: true,
       message: "Order updated successfully",
@@ -150,7 +164,7 @@ export const updateOrder = async (
     return sendResponse(reply, 500, {
       success: false,
       message: "Error updating order",
-      error: error,
+      error: error instanceof Error ? error.message : error,
     });
   }
 };
