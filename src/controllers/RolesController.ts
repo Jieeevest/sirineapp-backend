@@ -52,10 +52,13 @@ export const createRole = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
-  const { name } = request.body as { name: string };
+  const { name, description } = request.body as {
+    name: string;
+    description: string;
+  };
   try {
     const newRole = await prisma.roles.create({
-      data: { name },
+      data: { name, description },
     });
     return sendResponse(reply, 201, {
       success: true,
@@ -76,14 +79,17 @@ export const updateRole = async (
   reply: FastifyReply
 ) => {
   const { id } = request.params as { id: string };
-  const { name } = request.body as { name: string };
+  const { name, description } = request.body as {
+    name: string;
+    description: string;
+  };
   try {
     const validatedRole = await _validateRoleId(id, reply);
     if (!validatedRole) return;
 
     const updatedRole = await prisma.roles.update({
       where: { id: validatedRole.roleId },
-      data: { name },
+      data: { name, description },
     });
     return sendResponse(reply, 200, {
       success: true,

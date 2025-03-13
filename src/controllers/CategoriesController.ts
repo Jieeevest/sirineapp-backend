@@ -76,10 +76,13 @@ export const createCategory = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
-  const { name } = request.body as { name: string };
+  const { name, description } = request.body as {
+    name: string;
+    description: string;
+  };
   try {
     const newCategory = await prisma.category.create({
-      data: { name },
+      data: { name, description },
     });
     return sendResponse(reply, 201, {
       success: true,
@@ -100,14 +103,17 @@ export const updateCategory = async (
   reply: FastifyReply
 ) => {
   const { id } = request.params as { id: string };
-  const { name } = request.body as { name: string };
+  const { name, description } = request.body as {
+    name: string;
+    description: string;
+  };
   try {
     const validatedCategory = await _validateCategoryId(id, reply);
     if (!validatedCategory) return;
 
     const updatedCategory = await prisma.category.update({
       where: { id: validatedCategory.categoryId },
-      data: { name },
+      data: { name, description },
     });
     return sendResponse(reply, 200, {
       success: true,
