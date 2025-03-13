@@ -23,13 +23,14 @@ model Products {
 }
 
 model Carts {
-  id          Int             @id @default(autoincrement())
-  userId      Int
-  user        Users           @relation(fields: [userId], references: [id])
-  cartItems   CartItems[]
-  status      String          @default("active") // Example statuses: active, checked_out
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      Users     @relation(fields: [userId], references: [id])
+  order     Orders?   @relation() // One-to-one relation (handled on Orders side)
+  cartItems CartItems[]
+  status    String    @default("active") // Example: active, checked_out
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model CartItems {
@@ -53,13 +54,27 @@ model Category {
 }
 
 model Orders {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   userId      Int
-  user        Users    @relation(fields: [userId], references: [id])
+  user        Users     @relation(fields: [userId], references: [id])
   totalAmount Float
   status      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  cartId      Int?      @unique
+  cart        Carts?    @relation(fields: [cartId], references: [id])
+  orderItems  OrderItems[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model OrderItems {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Orders  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  quantity  Int
+  price     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Users {

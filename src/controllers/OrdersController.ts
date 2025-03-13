@@ -10,7 +10,7 @@ export const getOrders = async (
 ) => {
   try {
     const orders = await prisma.orders.findMany({
-      include: { user: true }, // Includes user who placed the order
+      include: { user: true, cart: true }, // Includes user who placed the order
     });
     return sendResponse(reply, 200, {
       success: true,
@@ -39,7 +39,10 @@ export const getOrderById = async (
     return sendResponse(reply, 200, {
       success: true,
       message: "Order fetched successfully",
-      data: validatedOrder.order,
+      data: {
+        order: validatedOrder.order,
+        orderItems: validatedOrder.orderItems,
+      },
     });
   } catch (error) {
     return sendResponse(reply, 500, {
@@ -179,7 +182,7 @@ export const deleteOrder = async (
 const _validateOrderId = async (
   id: string,
   reply: FastifyReply
-): Promise<{ orderId: number; order: Orders } | null> => {
+): Promise<{ orderId: number; order: Orders; orderItems: any } | null> => {
   const orderId = parseInt(id, 10);
   if (isNaN(orderId)) {
     sendResponse(reply, 400, {
@@ -192,7 +195,12 @@ const _validateOrderId = async (
   try {
     const order = await prisma.orders.findUnique({
       where: { id: orderId },
-      include: { user: true },
+      include: { user: true, cart: true },
+    });
+
+    const orderItems = await prisma.cartItems.findMany({
+      where: { cartId: Number(order?.cartId) },
+      include: { product: true },
     });
 
     if (!order) {
@@ -203,7 +211,7 @@ const _validateOrderId = async (
       return null;
     }
 
-    return { orderId, order };
+    return { orderId, order, orderItems };
   } catch (error) {
     sendResponse(reply, 500, {
       success: false,
