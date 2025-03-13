@@ -16,7 +16,12 @@ import {
 const server = Fastify();
 const prefix = "/api";
 
-server.register(fastifyMultipart);
+// Register plugin multipart
+server.register(fastifyMultipart, {
+  limits: {
+    fileSize: 10 * 1024 * 1024, // Maksimum 10MB
+  },
+});
 
 server.register(cors, {
   origin: "*",

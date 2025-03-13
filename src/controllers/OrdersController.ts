@@ -130,38 +130,52 @@ export const updateOrder = async (
   reply: FastifyReply
 ) => {
   const { id } = request.params as { id: string };
-  const { address, status } = request.body as {
-    address: string;
-    status: string;
-  };
-  const evidence = (request.body as any).evidence as File | undefined; // Evidence mungkin opsional
 
   try {
-    const validatedOrder = await _validateOrderId(id, reply);
-    if (!validatedOrder) return;
-
+    const parts = request.parts(); // Ambil semua data dari FormData
+    let address: any = "";
+    let status: any = "";
     let evidenceBuffer: Buffer | null = null;
-    if (evidence) {
-      const arrayBuffer = await evidence.arrayBuffer(); // Konversi File ke ArrayBuffer
-      evidenceBuffer = Buffer.from(arrayBuffer); // Ubah ke Buffer
+
+    for await (const part of parts) {
+      if (part.type === "file") {
+        // Jika part adalah file, simpan sebagai buffer
+        const chunks: Buffer[] = [];
+        for await (const chunk of part.file) {
+          chunks.push(chunk);
+        }
+        evidenceBuffer = Buffer.concat(chunks);
+      } else {
+        // Jika part adalah field (bukan file)
+        if (part.fieldname === "address") address = part.value;
+        if (part.fieldname === "status") status = part.value;
+      }
     }
 
+    if (!address || !status) {
+      return reply.status(400).send({
+        success: false,
+        message: "Address and status are required",
+      });
+    }
+
+    // Update order di database
     const updatedOrder = await prisma.orders.update({
-      where: { id: Number(validatedOrder.orderId) },
+      where: { id: Number(id) },
       data: {
         address,
         status,
-        evidence: evidenceBuffer, // Simpan sebagai binary dalam database
+        evidence: evidenceBuffer, // Simpan sebagai BLOB/Binary di DB
       },
     });
 
-    return sendResponse(reply, 200, {
+    return reply.send({
       success: true,
       message: "Order updated successfully",
       data: updatedOrder,
     });
   } catch (error) {
-    return sendResponse(reply, 500, {
+    return reply.status(500).send({
       success: false,
       message: "Error updating order",
       error: error instanceof Error ? error.message : error,
