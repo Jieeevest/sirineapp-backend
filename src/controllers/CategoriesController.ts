@@ -32,7 +32,7 @@ export const getPublicCategories = async (
 ) => {
   try {
     const categories = await prisma.category.findMany({
-      include: { products: true }, // Includes products under each category
+      include: { products: { where: { isPublic: true } } }, // Includes products under each category
     });
     return sendResponse(reply, 200, {
       success: true,
