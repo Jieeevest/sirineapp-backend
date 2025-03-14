@@ -122,10 +122,11 @@ export const register = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
-  const { name, email, password } = request.body as {
+  const { name, email, password, phoneNumber } = request.body as {
     name: string;
     email: string;
     password: string;
+    phoneNumber: string;
   };
 
   try {
@@ -139,7 +140,7 @@ export const register = async (
 
     // const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     const newUser = await prisma.users.create({
-      data: { name, email, password, roleId: 3 },
+      data: { name, email, password, phoneNumber, roleId: 3 },
     });
 
     return sendResponse(reply, 201, {
