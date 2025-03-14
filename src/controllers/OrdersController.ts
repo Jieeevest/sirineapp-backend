@@ -217,6 +217,20 @@ export const updateOrder = async (
       },
     });
 
+    if (status === "paid") {
+      const products = await prisma.cartItems.findMany({
+        where: { cartId: Number(updatedOrder.cartId) },
+        include: { product: true },
+      });
+
+      products.forEach(async (product) => {
+        await prisma.products.update({
+          where: { id: product.productId },
+          data: { stock: product.product.stock - product.quantity },
+        });
+      });
+    }
+
     return reply.send({
       success: true,
       message: "Order updated successfully",
