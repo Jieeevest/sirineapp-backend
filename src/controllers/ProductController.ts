@@ -79,35 +79,81 @@ export const createProduct = async (
   reply: FastifyReply
 ) => {
   try {
-    const data = await request.file();
-    if (!data) {
+    const parts = request.parts(); // Ambil semua data dari FormData
+    let name: any = "";
+    let description: any = "";
+    let price: any = null;
+    let stock: any = null;
+    let categoryId: any = null;
+    let isPublic: boolean = false;
+    let imageBuffer: Buffer | null = null;
+
+    // Loop untuk mengambil field dan file dari FormData
+    for await (const part of parts) {
+      if (part.type === "file") {
+        const chunks: Buffer[] = [];
+        for await (const chunk of part.file) {
+          chunks.push(chunk);
+        }
+        imageBuffer = Buffer.concat(chunks);
+      } else if (part.type === "field") {
+        switch (part.fieldname) {
+          case "name":
+            name = part.value as string;
+            break;
+          case "description":
+            description = part.value as string;
+            break;
+          case "price":
+            price = parseFloat(part.value as string);
+            break;
+          case "stock":
+            stock = parseInt(part.value as string, 10);
+            break;
+          case "categoryId":
+            categoryId = parseInt(part.value as string, 10);
+            break;
+          case "isPublic":
+            isPublic = (part.value as string) === "true";
+            break;
+        }
+      }
+    }
+
+    // Validasi input yang diperlukan
+    if (!name || price === null || stock === null || categoryId === null) {
+      return sendResponse(reply, 400, {
+        success: false,
+        message: "Missing required fields (name, price, stock, categoryId)",
+      });
+    }
+
+    // Pastikan harga, stok, dan categoryId adalah angka valid
+    if (isNaN(price) || isNaN(stock) || isNaN(categoryId)) {
+      return sendResponse(reply, 400, {
+        success: false,
+        message: "Invalid numeric values for price, stock, or categoryId",
+      });
+    }
+
+    // Pastikan ada gambar sebelum melanjutkan
+    if (!imageBuffer) {
       return sendResponse(reply, 400, {
         success: false,
         message: "Image file is required",
       });
     }
 
-    const { name, description, price, stock, categoryId, isPublic } =
-      request.body as {
-        name: string;
-        description?: string;
-        price: number;
-        stock: number;
-        categoryId: number;
-        isPublic: string;
-      };
-
-    const buffer = await data.toBuffer(); // Convert file to buffer
-
+    // Simpan ke database
     const newProduct = await prisma.products.create({
       data: {
         name,
         description,
         price,
         stock,
-        isPublic: isPublic === "true",
         categoryId,
-        image: buffer,
+        isPublic,
+        image: imageBuffer,
       },
     });
 
@@ -117,11 +163,11 @@ export const createProduct = async (
       data: newProduct,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error creating product:", error);
     return sendResponse(reply, 500, {
       success: false,
       message: "Error creating product",
-      error: error,
+      error: error instanceof Error ? error.message : error,
     });
   }
 };
@@ -132,34 +178,75 @@ export const updateProduct = async (
 ) => {
   try {
     const { id } = request.params as { id: string };
-    const data = await request.file();
 
-    const { name, description, price, stock, categoryId, isPublic } =
-      request.body as {
-        name?: string;
-        description?: string;
-        price?: number;
-        stock?: number;
-        categoryId?: number;
-        isPublic?: string;
-      };
-
+    // Validasi apakah produk dengan ID tersebut ada
     const validatedProduct = await _validateProductId(id, reply);
     if (!validatedProduct) return;
 
-    let updateData: any = {
-      name,
-      description,
-      price,
-      stock,
-      categoryId,
-      isPublic: isPublic === "true",
-    };
+    const parts = request.parts(); // Ambil semua data dari FormData
+    let updateData: Partial<{
+      name: string;
+      description: string;
+      price: number;
+      stock: number;
+      categoryId: number;
+      isPublic: boolean;
+      image: Buffer;
+    }> = {};
 
-    if (data) {
-      updateData.image = await data.toBuffer(); // Convert file to buffer
+    // Loop untuk mengambil field dan file dari FormData
+    for await (const part of parts) {
+      if (part.type === "file") {
+        const chunks: Buffer[] = [];
+        for await (const chunk of part.file) {
+          chunks.push(chunk);
+        }
+        updateData.image = Buffer.concat(chunks);
+      } else if (part.type === "field") {
+        switch (part.fieldname) {
+          case "name":
+            updateData.name = part.value as string;
+            break;
+          case "description":
+            updateData.description = part.value as string;
+            break;
+          case "price":
+            updateData.price = parseFloat(part.value as string);
+            break;
+          case "stock":
+            updateData.stock = parseInt(part.value as string, 10);
+            break;
+          case "categoryId":
+            updateData.categoryId = parseInt(part.value as string, 10);
+            break;
+          case "isPublic":
+            updateData.isPublic = (part.value as string) === "true";
+            break;
+        }
+      }
     }
 
+    // Pastikan harga, stok, dan categoryId adalah angka valid jika diberikan
+    if (
+      (updateData.price !== undefined && isNaN(updateData.price)) ||
+      (updateData.stock !== undefined && isNaN(updateData.stock)) ||
+      (updateData.categoryId !== undefined && isNaN(updateData.categoryId))
+    ) {
+      return sendResponse(reply, 400, {
+        success: false,
+        message: "Invalid numeric values for price, stock, or categoryId",
+      });
+    }
+
+    // Update hanya jika ada perubahan data
+    if (Object.keys(updateData).length === 0) {
+      return sendResponse(reply, 400, {
+        success: false,
+        message: "No valid fields provided for update",
+      });
+    }
+
+    // Update produk di database
     const updatedProduct = await prisma.products.update({
       where: { id: validatedProduct.productId },
       data: updateData,
@@ -171,11 +258,11 @@ export const updateProduct = async (
       data: updatedProduct,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error updating product:", error);
     return sendResponse(reply, 500, {
       success: false,
       message: "Error updating product",
-      error,
+      error: error instanceof Error ? error.message : error,
     });
   }
 };
