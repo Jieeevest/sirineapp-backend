@@ -245,6 +245,38 @@ export const updateOrder = async (
   }
 };
 
+export const reviewOrder = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const { id } = request.params as { id: string };
+  const { rating, comments } = request.body as {
+    rating: number;
+    comments: string;
+  };
+
+  try {
+    const validatedOrder = await _validateOrderId(id, reply);
+    if (!validatedOrder) return;
+
+    const updatedOrder = await prisma.orders.update({
+      where: { id: validatedOrder.orderId },
+      data: { rating, comments, isReviewed: true },
+    });
+    return sendResponse(reply, 200, {
+      success: true,
+      message: "Order reviewed successfully",
+      data: updatedOrder,
+    });
+  } catch (error) {
+    return sendResponse(reply, 500, {
+      success: false,
+      message: "Error reviewing order",
+      error: error,
+    });
+  }
+};
+
 export const deleteOrder = async (
   request: FastifyRequest,
   reply: FastifyReply

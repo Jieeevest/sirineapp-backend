@@ -1,6 +1,6 @@
 import productRoutes from "./productRoutes";
 import categoriesRoutes from "./categoriesRoutes";
-import ordersRoutes from "./ordersRoutres";
+import ordersRoutes from "./ordersRoutes";
 import rolesRoutes from "./rolesRoutes";
 import usersRoutes from "./usersRoutes";
 import cartsRoutes from "./cartsRoutes";
