@@ -60,6 +60,7 @@ model Orders {
   totalAmount Float
   address     String    @default("")
   evidence    Bytes?
+  receipt     Bytes?
   status      String
   cartId      Int?      @unique
   cart        Carts?    @relation(fields: [cartId], references: [id])

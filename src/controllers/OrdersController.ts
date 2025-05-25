@@ -277,6 +277,56 @@ export const reviewOrder = async (
   }
 };
 
+export const sendReceiptOrder = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const { id } = request.params as { id: string };
+
+  try {
+    const parts = request.parts(); // Ambil semua data dari FormData
+    let receiptBuffer: Buffer | null = null;
+
+    for await (const part of parts) {
+      if (part.type === "file" && part.fieldname === "receipt") {
+        // Jika part adalah file dan nama field-nya 'receipt'
+        const chunks: Buffer[] = [];
+        for await (const chunk of part.file) {
+          chunks.push(chunk);
+        }
+        receiptBuffer = Buffer.concat(chunks);
+      }
+    }
+
+    if (!receiptBuffer) {
+      return reply.status(400).send({
+        success: false,
+        message: "No receipt file uploaded",
+      });
+    }
+
+    // Update order di database
+    const updatedOrder = await prisma.orders.update({
+      where: { id: Number(id) },
+      data: {
+        receipt: receiptBuffer, // Simpan sebagai BLOB/Binary di DB
+      },
+    });
+
+    return reply.send({
+      success: true,
+      message: "Send receipt successfully",
+      data: updatedOrder,
+    });
+  } catch (error) {
+    return reply.status(500).send({
+      success: false,
+      message: "Error sending receipt",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};
+
 export const deleteOrder = async (
   request: FastifyRequest,
   reply: FastifyReply
