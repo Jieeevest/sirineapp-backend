@@ -23,6 +23,7 @@ export const login = async (request: FastifyRequest, reply: FastifyReply) => {
         email: true,
         password: true,
         name: true,
+        address: true,
         roleId: true,
         roles: true,
       },
@@ -48,6 +49,7 @@ export const login = async (request: FastifyRequest, reply: FastifyReply) => {
         email: user.email,
         name: user.name,
         role: user.roles,
+        address: user.address,
         client_url,
         authorized_url: `http://${client_url}/${token}`,
       },
@@ -89,6 +91,7 @@ export const getCurrentUser = async (
         id: true,
         email: true,
         name: true,
+        address: true,
         roleId: true,
         roles: true,
         createdAt: true,
@@ -122,11 +125,12 @@ export const register = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
-  const { name, email, password, phoneNumber } = request.body as {
+  const { name, email, password, phoneNumber, address } = request.body as {
     name: string;
     email: string;
     password: string;
     phoneNumber: string;
+    address: string;
   };
 
   try {
@@ -140,7 +144,7 @@ export const register = async (
 
     // const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     const newUser = await prisma.users.create({
-      data: { name, email, password, phoneNumber, roleId: 3 },
+      data: { name, email, password, phoneNumber, roleId: 3, address },
     });
 
     return sendResponse(reply, 201, {

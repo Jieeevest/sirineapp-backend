@@ -89,6 +89,7 @@ model Users {
   email       String   @unique
   password    String
   phoneNumber String   @default("")
+  address     String   @default("")
   roles       Roles    @relation(fields: [roleId], references: [id])
   roleId      Int
   carts       Carts[]
