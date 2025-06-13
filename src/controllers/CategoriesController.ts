@@ -40,6 +40,7 @@ export const getPublicCategories = async (
       data: categories,
     });
   } catch (error) {
+    console.log(error);
     return sendResponse(reply, 500, {
       success: false,
       message: "Error fetching categories",
